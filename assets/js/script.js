@@ -70,6 +70,7 @@ var auditTask = function(taskEl) {
   else if (Math.abs(moment().diff(time, "days")) <= 2) {
     $(taskEl).addClass("list-group-item-warning");
   }
+  console.log(taskEl)
 };
 
 $(".card .list-group").sortable({
@@ -77,17 +78,19 @@ $(".card .list-group").sortable({
   scroll: false,
   tolerance: "pointer",
   helper: "clone",
-  activate: function (event) {
-    console.log("activate", this);
+  activate: function (event, ui) {
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-trash-drag");
   },
-  desactivate: function (event) {
-    console.log("desactivate", this);
+  deactivate: function (event, ui) {
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-trash-drag");
   },
   over: function (event) {
-    console.log("over", event.target);
+    $(event.target).addClass("dropover-active");
   },
   out: function (event) {
-    console.log("out", event.target);
+    $(event.target).removeClass("dropover-active");
   },
   update: function (event) {
 
@@ -129,14 +132,15 @@ $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
   drop: function (event, ui) {
-    console.log("drop");
     ui.draggable.remove();
+    $(".bottom-trash").removeClass("bottom-trash-active");
   },
   over: function (event, ui) {
     console.log(ui);
+    $(".bottom-trash").addClass("bottom-trash-active");
   },
   out: function (event, ui) {
-    console.log(ui);
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
 });
 
@@ -157,7 +161,7 @@ $("#modalDueDate").datepicker({
     });
 
     // save button in modal was clicked
-    $("#task-form-modal .btn-primary").click(function () {
+    $("#task-form-modal .btn-save").click(function () {
       // get form values
       var taskText = $("#modalTaskDescription").val();
       var taskDate = $("#modalDueDate").val();
@@ -286,3 +290,9 @@ $("#remove-tasks").on("click", function () {
 
 // load tasks for the first time
 loadTasks();
+
+setInterval(function() {
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  });
+}, (1000 * 60) * 30);
